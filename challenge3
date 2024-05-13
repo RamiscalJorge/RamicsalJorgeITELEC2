@@ -1,0 +1,95 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract EventTrigger {
+    // Define events with indexed parameters
+    event DataStored(address indexed user, uint256 indexed dataId, uint256 dataValue);
+    event EtherDeposited(address indexed from, uint256 amount);
+    event AdminChanged(address indexed oldAdmin, address indexed newAdmin);
+
+    address public admin;
+    uint256 public dataCounter;
+
+    struct Data {
+        uint256 id;
+        uint256 value;
+    }
+
+    mapping(uint256 => Data) public dataStore;
+
+    constructor() {
+        admin = msg.sender;
+        dataCounter = 0;
+    }
+
+    // Function to store data and trigger DataStored event
+    function storeData(uint256 dataValue) public {
+        dataCounter++;
+        dataStore[dataCounter] = Data(dataCounter, dataValue);
+        emit DataStored(msg.sender, dataCounter, dataValue);
+    }
+
+    // Payable function to receive ether and trigger EtherDeposited event
+    function depositEther() public payable {
+        require(msg.value > 0, "Must send some ether");
+        emit EtherDeposited(msg.sender, msg.value);
+    }
+
+    // Function to change admin and trigger AdminChanged event
+    function changeAdmin(address newAdmin) public {
+        require(msg.sender == admin, "Only admin can change admin");
+        require(newAdmin != address(0), "New admin cannot be zero address");
+        address oldAdmin = admin;
+        admin = newAdmin;
+        emit AdminChanged(oldAdmin, newAdmin);
+    }
+}
+const Web3 = require('web3');
+const web3 = new Web3('YOUR_INFURA_OR_ALCHEMY_ENDPOINT'); // Use your own Infura or Alchemy endpoint
+const contractAddress = 'YOUR_CONTRACT_ADDRESS'; // Replace with your contract address
+const contractABI = [/* Your contract ABI goes here */];
+
+// Initialize contract
+const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+// Function to listen to events
+function listenToEvents() {
+    // Listen to DataStored events
+    contract.events.DataStored({
+        filter: {},
+        fromBlock: 'latest'
+    }, function(error, event) {
+        if (error) {
+            console.error(error);
+        } else {
+            console.log("DataStored event:", event);
+        }
+    });
+
+    // Listen to EtherDeposited events
+    contract.events.EtherDeposited({
+        filter: {},
+        fromBlock: 'latest'
+    }, function(error, event) {
+        if (error) {
+            console.error(error);
+        } else {
+            console.log("EtherDeposited event:", event);
+        }
+    });
+
+    // Listen to AdminChanged events
+    contract.events.AdminChanged({
+        filter: {},
+        fromBlock: 'latest'
+    }, function(error, event) {
+        if (error) {
+            console.error(error);
+        } else {
+            console.log("AdminChanged event:", event);
+        }
+    });
+}
+
+// Start listening to events
+listenToEvents();
