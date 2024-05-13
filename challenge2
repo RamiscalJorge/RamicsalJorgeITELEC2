@@ -1,0 +1,61 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract FunctionTypes {
+    uint256 public storedData;
+
+    // A constructor to initialize the storedData
+    constructor(uint256 initialValue) {
+        storedData = initialValue;
+    }
+
+    // View function: returns the stored data, does not modify the state
+    function getStoredData() public view returns (uint256) {
+        return storedData;
+    }
+
+    // Pure function: does not read or modify the state, performs a calculation
+    function calculateSum(uint256 a, uint256 b) public pure returns (uint256) {
+        return a + b;
+    }
+
+    // Payable function: allows the contract to receive ether
+    function deposit() public payable {
+        // Function logic here, if needed
+    }
+
+    // Function to get the contract balance (view function)
+    function getContractBalance() public view returns (uint256) {
+        return address(this).balance;
+    }
+}
+
+contract DerivedContract is FunctionTypes {
+    // Constructor to initialize the base contract's storedData
+    constructor(uint256 initialValue) FunctionTypes(initialValue) {}
+
+    // Additional function in the derived contract
+    function incrementStoredData(uint256 incrementValue) public {
+        storedData += incrementValue;
+    }
+
+    // Another function to demonstrate the accessibility of base functions
+    function derivedGetStoredData() public view returns (uint256) {
+        return getStoredData();
+    }
+
+    // Function to demonstrate the accessibility of pure function
+    function derivedCalculateSum(uint256 a, uint256 b) public pure returns (uint256) {
+        return calculateSum(a, b);
+    }
+
+    // Function to demonstrate the accessibility of payable function
+    function derivedDeposit() public payable {
+        deposit();
+    }
+
+    // Function to get the contract balance from derived contract
+    function derivedGetContractBalance() public view returns (uint256) {
+        return getContractBalance();
+    }
+}
