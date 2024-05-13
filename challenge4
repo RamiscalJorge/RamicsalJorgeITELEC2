@@ -1,0 +1,44 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract MessageContext {
+    address public admin;
+    uint256 public lastDepositAmount;
+    address public lastDepositor;
+    uint256 public lastDepositTimestamp;
+
+    event AdminChanged(address indexed oldAdmin, address indexed newAdmin, uint256 timestamp);
+    event EtherDeposited(address indexed depositor, uint256 amount, uint256 timestamp);
+    event MessageDetails(address indexed sender, uint256 value, uint256 gas);
+
+    constructor() {
+        admin = msg.sender;
+    }
+
+    // Function to deposit ether and record message context
+    function depositEther() public payable {
+        require(msg.value > 0, "Must send some ether");
+
+        // Record the message details
+        lastDepositAmount = msg.value;
+        lastDepositor = msg.sender;
+        lastDepositTimestamp = block.timestamp;
+
+        // Emit events
+        emit EtherDeposited(msg.sender, msg.value, block.timestamp);
+        emit MessageDetails(msg.sender, msg.value, gasleft());
+    }
+
+    // Function to change admin and record the context
+    function changeAdmin(address newAdmin) public {
+        require(msg.sender == admin, "Only admin can change admin");
+        require(newAdmin != address(0), "New admin cannot be zero address");
+
+        address oldAdmin = admin;
+        admin = newAdmin;
+
+        // Emit event
+        emit AdminChanged(oldAdmin, newAdmin, block.timestamp);
+        emit MessageDetails(msg.sender, 0, gasleft());
+    }
+}
